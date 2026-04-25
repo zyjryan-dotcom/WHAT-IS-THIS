@@ -1,80 +1,62 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>对话练习</title>
-    <style>
-        body { text-align: center; font-family: sans-serif; padding: 20px; background: #f0f4f8; }
-        /* 这里的 .bar 就是你要求的长条样式 */
-        .bar {
-            width: 100%; max-width: 400px; padding: 20px; margin: 10px auto;
-            border-radius: 15px; border: none; cursor: pointer; display: block;
-            font-size: 22px; font-weight: bold; color: white; transition: 0.2s;
-        }
-        .blue { background: #2196F3; box-shadow: 0 4px #1565C0; } /* 问题条 */
-        .green { background: #4CAF50; box-shadow: 0 4px #2e7d32; } /* 回答条 */
-        .orange { background: #ff9800; box-shadow: 0 4px #e68a00; margin-top: 30px; } /* 下一题 */
-        #result { margin: 20px; color: #ff5722; font-weight: bold; font-size: 24px; min-height: 1.2em; }
-        .hint { font-size: 14px; color: #888; }
-    </style>
-</head>
-<body>
+<script>
+    let data = [
+        { q: "这是什么？", a: ["这是足球", "这是球"] },
+        { q: "这是谁的足球？", a: ["这是JJ的足球", "我的足球"] },
+        { q: "这是什么？", a: ["这是花", "漂亮的花"] },
+        { q: "这是谁的花？", a: ["这是Sophia的花", "妈妈的花"] },
+        { q: "这是什么？", a: ["这是鞋子", "小鞋子"] },
+        { q: "这是谁的鞋子？", a: ["这是妈妈的鞋子", "JJ的鞋子"] },
+        { q: "这是什么？", a: ["这是钱", "纸币"] },
+        { q: "这是谁的钱？", a: ["这是爸爸和妈妈的钱", "我的钱"] },
+        { q: "这是什么？", a: ["这是小狗", "可爱的小狗"] },
+        { q: "这是谁的小狗？", a: ["这是Maddie的小狗", "我们的狗狗"] }
+    ];
 
-    <div class="hint">点击蓝条听问题</div>
-    <button id="q-bar" class="bar blue" onclick="speak(this.innerText)">加载中...</button>
+    let index = 0;
+    let isStudentAsk = false; // 👉 新增：是否切换“学生提问模式”
 
-    <div style="margin-top: 30px;" class="hint">点击绿条选回答</div>
-    <button id="a1" class="bar green" onclick="choose(this.innerText)">---</button>
-    <button id="a2" class="bar green" onclick="choose(this.innerText)">---</button>
+    function speak(txt) {
+        if (!txt || txt === "---") return;
+        window.speechSynthesis.cancel();
+        let m = new SpeechSynthesisUtterance(txt);
+        m.lang = "zh-CN";
+        m.rate = 0.8;
+        window.speechSynthesis.speak(m);
+    }
 
-    <p id="result"></p>
+    // 👉 点击问题：播放 + 切换“谁在问”
+    function speakQuestion() {
+        let q = data[index].q;
 
-    <button class="bar orange" onclick="next()">下一句 ➡️</button>
-
-    <script>
-        let data = [
-            { q: "这是什么？", a: ["这是足球", "这是球"] },
-            { q: "这是谁的足球？", a: ["这是JJ的足球", "我的足球"] },
-            { q: "这是什么？", a: ["这是花", "漂亮的花"] },
-            { q: "这是谁的花？", a: ["这是Sophia的花", "妈妈的花"] },
-            { q: "这是什么？", a: ["这是鞋子", "小鞋子"] },
-            { q: "这是谁的鞋子？", a: ["这是妈妈的鞋子", "JJ的鞋子"] },
-            { q: "这是什么？", a: ["这是钱", "纸币"] },
-            { q: "这是谁的钱？", a: ["这是爸爸和妈妈的钱", "我的钱"] },
-            { q: "这是什么？", a: ["这是小狗", "可爱的小狗"] },
-            { q: "这是谁的小狗？", a: ["这是Maddie的小狗", "我们的狗狗"] }
-        ];
-
-        let index = 0;
-
-        function speak(txt) {
-            if (!txt || txt === "---") return;
-            window.speechSynthesis.cancel();
-            let m = new SpeechSynthesisUtterance(txt);
-            m.lang = "zh-CN";
-            m.rate = 0.8;
-            window.speechSynthesis.speak(m);
+        if (isStudentAsk) {
+            document.getElementById("result").innerText = "👉 请你来问：";
+        } else {
+            document.getElementById("result").innerText = "👉 听问题：";
         }
 
-        function choose(txt) {
-            document.getElementById("result").innerText = "你说：" + txt;
-            speak(txt);
-        }
+        speak(q);
+        isStudentAsk = !isStudentAsk; // 👉 每次点击切换角色
+    }
 
-        function update() {
-            document.getElementById("q-bar").innerText = data[index].q;
-            document.getElementById("a1").innerText = data[index].a[0];
-            document.getElementById("a2").innerText = data[index].a[1];
-            document.getElementById("result").innerText = "";
-        }
+    function choose(txt) {
+        document.getElementById("result").innerText = "你说：" + txt;
+        speak(txt);
+    }
 
-        function next() {
-            index = (index + 1) % data.length;
-            update();
-        }
+    function update() {
+        document.getElementById("q-bar").innerText = data[index].q;
+        document.getElementById("a1").innerText = data[index].a[0];
+        document.getElementById("a2").innerText = data[index].a[1];
+        document.getElementById("result").innerText = "";
 
-        window.onload = update;
-    </script>
-</body>
-</html>
+        // 👉 自动读问题（课堂神器）
+        setTimeout(() => speak(data[index].q), 300);
+    }
+
+    function next() {
+        index = (index + 1) % data.length;
+        update();
+    }
+
+    window.onload = update;
+</script>
