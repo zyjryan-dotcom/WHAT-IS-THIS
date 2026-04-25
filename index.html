@@ -1,4 +1,3 @@
-HTML
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -14,81 +13,89 @@ HTML
             max-width: 800px; 
             margin: 0 auto; 
             background-color: #f7f9fc;
+            user-select: none; /* 防止长按选中文本 */
         }
-        .question-box {
-            background-color: white;
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            margin-top: 20px;
-        }
-        h2 { color: #2c3e50; display: inline; vertical-align: middle; }
-        .speak-q-btn { 
-            background: none; 
-            border: none; 
-            font-size: 28px; 
-            cursor: pointer; 
-            vertical-align: middle;
-            margin-left: 10px;
-        }
-        .btn-container { margin: 30px 0; }
-        button.answer-btn { 
-            font-size: 22px; 
-            margin: 10px; 
-            padding: 15px 30px; 
-            border-radius: 15px; 
-            cursor: pointer; 
-            border: none;
-            background-color: #4CAF50; 
-            color: white; 
-            box-shadow: 0 5px #2e7d32; 
-            transition: 0.2s;
-        }
-        button.answer-btn:active { 
-            transform: translateY(3px); 
-            box-shadow: 0 2px #2e7d32; 
-        }
-        #result { 
-            margin: 25px 0; 
-            min-height: 1.5em; 
-            font-weight: bold; 
-            color: #ff5722; 
-        }
-        .control-panel {
-            background: #eee;
+        h3 { color: #7f8c8d; font-size: 18px; margin-bottom: 10px; }
+        
+        /* 统一的按钮样式 */
+        .clickable-bar {
+            width: 100%;
+            max-width: 500px;
+            font-size: 24px;
+            margin: 10px auto;
             padding: 20px;
             border-radius: 15px;
-        }
-        .action-btn {
-            font-size: 20px;
-            padding: 12px 25px;
-            border-radius: 10px;
-            border: none;
             cursor: pointer;
-            margin: 5px;
-            color: white;
+            border: none;
+            display: block;
+            transition: all 0.2s;
+            font-weight: bold;
         }
-        .speak-a-btn { background-color: #2196F3; }
-        .next-btn { background-color: #ff9800; }
+
+        /* 问句按钮：蓝色 */
+        .question-bar {
+            background-color: #2196F3;
+            color: white;
+            box-shadow: 0 5px #1976D2;
+            margin-bottom: 30px;
+        }
+        .question-bar:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px #1976D2;
+        }
+
+        /* 回答按钮：绿色 */
+        .answer-bar {
+            background-color: #4CAF50;
+            color: white;
+            box-shadow: 0 5px #2e7d32;
+        }
+        .answer-bar:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px #2e7d32;
+        }
+
+        #result { 
+            margin: 20px 0; 
+            min-height: 1.5em; 
+            font-weight: bold; 
+            color: #ff5722;
+            font-size: 26px;
+        }
+
+        /* 下一步按钮：橙色 */
+        .next-btn {
+            background-color: #ff9800;
+            color: white;
+            font-size: 20px;
+            padding: 15px 40px;
+            margin-top: 20px;
+            box-shadow: 0 5px #e68a00;
+        }
+        .next-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px #e68a00;
+        }
+
+        .label { font-size: 16px; color: #95a5a6; margin-top: 5px; }
     </style>
 </head>
 <body>
-    <div class="question-box">
-        <h2 id="question">准备好了吗？</h2>
-        <button class="speak-q-btn" onclick="speakText(document.getElementById('question').textContent)">🔊</button>
+
+    <div class="label">点击蓝条听问题 🔊</div>
+    <button id="question-btn" class="clickable-bar question-bar" onclick="speakText(this.textContent)">
+        加载中...
+    </button>
+
+    <div style="margin: 40px 0;">
+        <div class="label">点击绿条选回答并点读 🔊</div>
+        <button id="btn1" class="clickable-bar answer-bar">---</button>
+        <button id="btn2" class="clickable-bar answer-bar">---</button>
     </div>
-    
-    <div class="btn-container">
-        <button id="btn1" class="answer-btn">---</button>
-        <button id="btn2" class="answer-btn">---</button>
-    </div>
-    
+
     <p id="result"></p>
-    
-    <div class="control-panel">
-        <button class="action-btn speak-a-btn" onclick="speakSelected()">🔊 读我的回答</button>
-        <button class="action-btn next-btn" onclick="next()">下一句 ➡️</button>
-    </div>
+
+    <button class="clickable-bar next-btn" onclick="next()">下一句 ➡️</button>
 
     <script>
         let data = [
@@ -105,43 +112,33 @@ HTML
         ];
 
         let index = 0;
-        let selected = "";
 
-        const questionEl = document.getElementById("question");
+        const questionBtn = document.getElementById("question-btn");
         const resultEl = document.getElementById("result");
         const btn1 = document.getElementById("btn1");
         const btn2 = document.getElementById("btn2");
 
-        // 通用的朗读函数
+        // 朗读函数
         function speakText(text) {
             if (!text || text === "---") return;
-            speechSynthesis.cancel();
+            speechSynthesis.cancel(); // 停止当前正在读的内容
             let msg = new SpeechSynthesisUtterance(text);
             msg.lang = "zh-CN";
             msg.rate = 0.8; 
             speechSynthesis.speak(msg);
         }
 
-        // 朗读学生选中的回答
-        function speakSelected() {
-            if (!selected) {
-                alert("请先选一个回答哦！");
-                return;
-            }
-            speakText(selected);
-        }
-
-        function choose(text) {
-            selected = text;
+        // 选择并朗读回答
+        function chooseAndSpeak(text) {
             resultEl.innerHTML = `你说：${text}`;
+            speakText(text);
         }
 
         function updateQuestion() {
-            questionEl.textContent = data[index].q;
+            questionBtn.textContent = data[index].q;
             btn1.textContent = data[index].a[0];
             btn2.textContent = data[index].a[1];
             resultEl.innerHTML = "";
-            selected = "";
         }
 
         function next() {
@@ -150,8 +147,8 @@ HTML
         }
 
         function init() {
-            btn1.onclick = () => choose(btn1.textContent);
-            btn2.onclick = () => choose(btn2.textContent);
+            btn1.onclick = () => chooseAndSpeak(btn1.textContent);
+            btn2.onclick = () => chooseAndSpeak(btn2.textContent);
             updateQuestion();
         }
 
