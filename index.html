@@ -1,23 +1,63 @@
+HTML
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>亲子中文对话</title>
+    <title>亲子中文对话练习</title>
     <style>
-        body { text-align: center; font-size: 24px; font-family: "Microsoft YaHei", sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; background-color: #f7f9fc; }
-        h2 { color: #2c3e50; }
-        button { font-size: 22px; margin: 10px; padding: 12px 24px; border-radius: 12px; cursor: pointer; border: none; transition: 0.2s; }
-        .answer-btn { background-color: #4CAF50; color: white; box-shadow: 0 4px #388E3C; }
-        .answer-btn:active { transform: translateY(2px); box-shadow: 0 2px #388E3C; }
-        #result { margin: 20px 0; min-height: 1.5em; font-weight: bold; color: #e67e22; }
-        .control-btn { background-color: #3498db; color: white; }
+        body { 
+            text-align: center; 
+            font-size: 24px; 
+            font-family: "Microsoft YaHei", sans-serif; 
+            padding: 20px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background-color: #fdfdfd;
+        }
+        h2 { color: #333; margin-top: 30px; }
+        .btn-container { margin: 20px 0; }
+        button { 
+            font-size: 22px; 
+            margin: 10px; 
+            padding: 15px 30px; 
+            border-radius: 15px; 
+            cursor: pointer; 
+            border: none;
+            transition: all 0.2s;
+        }
+        .answer-btn { 
+            background-color: #4CAF50; 
+            color: white; 
+            box-shadow: 0 5px #2e7d32; 
+        }
+        .answer-btn:active { 
+            transform: translateY(3px); 
+            box-shadow: 0 2px #2e7d32; 
+        }
+        #result { 
+            margin: 30px 0; 
+            min-height: 1.5em; 
+            font-weight: bold; 
+            color: #ff5722; 
+            border-bottom: 2px dashed #ccc;
+            padding-bottom: 10px;
+        }
+        .control-btn { 
+            background-color: #2196F3; 
+            color: white; 
+            font-weight: bold;
+        }
+        .next-btn {
+            background-color: #ff9800;
+            color: white;
+        }
     </style>
 </head>
 <body>
     <h2 id="question">准备好了吗？</h2>
     
-    <div id="btn-container">
+    <div class="btn-container">
         <button id="btn1" class="answer-btn">---</button>
         <button id="btn2" class="answer-btn">---</button>
     </div>
@@ -26,21 +66,21 @@
     
     <button class="control-btn" onclick="speak()">🔊 读出来</button>
     <br><br>
-    <button class="control-btn" onclick="next()">下一句 ➡️</button>
+    <button class="next-btn" onclick="next()">下一句 ➡️</button>
 
     <script>
-        // 修复了逗号漏写的问题，并补充了第二个选项
+        // 这里是你的新对话内容
         let data = [
-            { q: "这是什么？", a: ["这是足球", "是一个球"] },
-            { q: "这是谁的足球？", a: ["这是JJ的足球", "这是我的"] },
-            { q: "这是什么？", a: ["这是花", "红色的花"] },
+            { q: "这是什么？", a: ["这是足球", "这是球"] },
+            { q: "这是谁的足球？", a: ["这是JJ的足球", "我的足球"] },
+            { q: "这是什么？", a: ["这是花", "漂亮的花"] },
             { q: "这是谁的花？", a: ["这是Sophia的花", "妈妈的花"] },
-            { q: "这是什么？", a: ["这是鞋子", "漂亮的鞋子"] },
+            { q: "这是什么？", a: ["这是鞋子", "小鞋子"] },
             { q: "这是谁的鞋子？", a: ["这是妈妈的鞋子", "JJ的鞋子"] },
             { q: "这是什么？", a: ["这是钱", "纸币"] },
-            { q: "这是谁的钱？", a: ["这是爸爸和妈妈的钱", "我的零花钱"] },
+            { q: "这是谁的钱？", a: ["这是爸爸和妈妈的钱", "我的钱"] },
             { q: "这是什么？", a: ["这是小狗", "可爱的小狗"] },
-            { q: "这是谁的小狗？", a: ["这是Maddie的小狗", "邻居的小狗"] }
+            { q: "这是谁的小狗？", a: ["这是Maddie的小狗", "我们的狗狗"] }
         ];
 
         let index = 0;
@@ -61,7 +101,8 @@
             speechSynthesis.cancel();
             let msg = new SpeechSynthesisUtterance(selected);
             msg.lang = "zh-CN";
-            msg.rate = 0.8;
+            msg.rate = 0.85; // 语速微调
+            msg.pitch = 1.1; 
             speechSynthesis.speak(msg);
         }
 
