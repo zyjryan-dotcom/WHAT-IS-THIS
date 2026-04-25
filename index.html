@@ -13,89 +13,65 @@
             max-width: 800px; 
             margin: 0 auto; 
             background-color: #f7f9fc;
-            user-select: none; /* 防止长按选中文本 */
         }
-        h3 { color: #7f8c8d; font-size: 18px; margin-bottom: 10px; }
+        .label { font-size: 16px; color: #7f8c8d; margin-bottom: 5px; margin-top: 15px; }
         
-        /* 统一的按钮样式 */
-        .clickable-bar {
+        /* 这里的 bar 就是你想要的长条按钮样式 */
+        .bar {
             width: 100%;
             max-width: 500px;
-            font-size: 24px;
-            margin: 10px auto;
             padding: 20px;
+            margin: 10px auto;
             border-radius: 15px;
-            cursor: pointer;
             border: none;
+            cursor: pointer;
             display: block;
-            transition: all 0.2s;
+            font-size: 24px;
             font-weight: bold;
+            transition: 0.2s;
         }
 
-        /* 问句按钮：蓝色 */
+        /* 问题条：蓝色 */
         .question-bar {
             background-color: #2196F3;
             color: white;
-            box-shadow: 0 5px #1976D2;
-            margin-bottom: 30px;
+            box-shadow: 0 5px #1565C0;
         }
-        .question-bar:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px #1976D2;
-        }
+        .question-bar:active { transform: translateY(3px); box-shadow: 0 2px #1565C0; }
 
-        /* 回答按钮：绿色 */
+        /* 回答条：绿色 */
         .answer-bar {
             background-color: #4CAF50;
             color: white;
             box-shadow: 0 5px #2e7d32;
         }
-        .answer-bar:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px #2e7d32;
-        }
+        .answer-bar:active { transform: translateY(3px); box-shadow: 0 2px #2e7d32; }
 
-        #result { 
-            margin: 20px 0; 
-            min-height: 1.5em; 
-            font-weight: bold; 
-            color: #ff5722;
-            font-size: 26px;
-        }
+        #result { margin: 20px 0; color: #ff5722; font-weight: bold; min-height: 1.5em; }
 
-        /* 下一步按钮：橙色 */
+        /* 下一题：橙色 */
         .next-btn {
             background-color: #ff9800;
             color: white;
-            font-size: 20px;
-            padding: 15px 40px;
-            margin-top: 20px;
             box-shadow: 0 5px #e68a00;
+            margin-top: 30px;
         }
-        .next-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px #e68a00;
-        }
-
-        .label { font-size: 16px; color: #95a5a6; margin-top: 5px; }
     </style>
 </head>
 <body>
 
     <div class="label">点击蓝条听问题 🔊</div>
-    <button id="question-btn" class="clickable-bar question-bar" onclick="speakText(this.textContent)">
+    <button id="question-bar" class="bar question-bar" onclick="speak(this.textContent)">
         加载中...
     </button>
 
-    <div style="margin: 40px 0;">
-        <div class="label">点击绿条选回答并点读 🔊</div>
-        <button id="btn1" class="clickable-bar answer-bar">---</button>
-        <button id="btn2" class="clickable-bar answer-bar">---</button>
-    </div>
+    <div class="label">点击绿条选回答 🔊</div>
+    <button id="btn1" class="bar answer-bar" onclick="chooseAndSpeak(this.textContent)">---</button>
+    <button id="btn2" class="bar answer-bar" onclick="chooseAndSpeak(this.textContent)">---</button>
 
     <p id="result"></p>
 
-    <button class="clickable-bar next-btn" onclick="next()">下一句 ➡️</button>
+    <button class="bar next-btn" onclick="next()">下一句 ➡️</button>
 
     <script>
         let data = [
@@ -106,53 +82,4 @@
             { q: "这是什么？", a: ["这是鞋子", "小鞋子"] },
             { q: "这是谁的鞋子？", a: ["这是妈妈的鞋子", "JJ的鞋子"] },
             { q: "这是什么？", a: ["这是钱", "纸币"] },
-            { q: "这是谁的钱？", a: ["这是爸爸和妈妈的钱", "我的钱"] },
-            { q: "这是什么？", a: ["这是小狗", "可爱的小狗"] },
-            { q: "这是谁的小狗？", a: ["这是Maddie的小狗", "我们的狗狗"] }
-        ];
-
-        let index = 0;
-
-        const questionBtn = document.getElementById("question-btn");
-        const resultEl = document.getElementById("result");
-        const btn1 = document.getElementById("btn1");
-        const btn2 = document.getElementById("btn2");
-
-        // 朗读函数
-        function speakText(text) {
-            if (!text || text === "---") return;
-            speechSynthesis.cancel(); // 停止当前正在读的内容
-            let msg = new SpeechSynthesisUtterance(text);
-            msg.lang = "zh-CN";
-            msg.rate = 0.8; 
-            speechSynthesis.speak(msg);
-        }
-
-        // 选择并朗读回答
-        function chooseAndSpeak(text) {
-            resultEl.innerHTML = `你说：${text}`;
-            speakText(text);
-        }
-
-        function updateQuestion() {
-            questionBtn.textContent = data[index].q;
-            btn1.textContent = data[index].a[0];
-            btn2.textContent = data[index].a[1];
-            resultEl.innerHTML = "";
-        }
-
-        function next() {
-            index = (index + 1) % data.length;
-            updateQuestion();
-        }
-
-        function init() {
-            btn1.onclick = () => chooseAndSpeak(btn1.textContent);
-            btn2.onclick = () => chooseAndSpeak(btn2.textContent);
-            updateQuestion();
-        }
-
-        window.onload = init;
-    </script>
-</body>
-</html>
+            { q: "这是谁的
