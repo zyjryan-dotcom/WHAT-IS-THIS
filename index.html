@@ -1,188 +1,161 @@
 <!DOCTYPE html>
 <html lang="zh">
-
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中文练习 - 简约版</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            background: #f0f4f8;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-<title>中文练习</title>
+        /* 激活遮罩层 */
+        #start-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(33, 150, 243, 0.95);
+            color: white; z-index: 100;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
 
-<style>
+        button {
+            width: 320px;
+            padding: 22px;
+            margin: 12px;
+            border: none;
+            border-radius: 15px;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
 
-body{
-    font-family:sans-serif;
-    text-align:center;
-    background:#f0f4f8;
-    padding:20px;
-}
+        button:active { transform: scale(0.98); }
 
-button{
-    width:300px;
-    padding:20px;
-    margin:10px;
-    border:none;
-    border-radius:15px;
-    font-size:22px;
-    color:white;
-}
+        .blue { background: #2196F3; }
+        .green { background: #4CAF50; }
+        .orange { background: #FF9800; }
 
-.blue{
-    background:#2196F3;
-}
+        #result {
+            margin: 25px;
+            font-size: 26px;
+            font-weight: bold;
+            color: #FF5722;
+            min-height: 1.2em;
+        }
 
-.green{
-    background:#4CAF50;
-}
-
-.orange{
-    background:orange;
-}
-
-#result{
-    margin:20px;
-    font-size:24px;
-    color:#ff5722;
-}
-
-</style>
+        .label { color: #666; font-size: 14px; margin-bottom: -5px; }
+    </style>
 </head>
-
 <body>
+
+<!-- 点击这个层来解锁浏览器声音 -->
+<div id="start-overlay" onclick="startApp()">
+    <h1 style="font-size: 3rem;">点击开始</h1>
+    <p>Click to activate Sound</p>
+</div>
 
 <h1>中文对话练习</h1>
 
-<button id="question" class="blue">
-加载中
-</button>
+<p class="label">点击蓝按钮听问题</p>
+<button id="question" class="blue">加载中</button>
 
 <br>
 
-<button id="answer1" class="green">
----
-</button>
-
-<button id="answer2" class="green">
----
-</button>
+<p class="label">点击绿按钮选回答</p>
+<button id="answer1" class="green">---</button>
+<button id="answer2" class="green">---</button>
 
 <div id="result"></div>
 
-<button id="next" class="orange">
-下一题
-</button>
+<button id="next" class="orange">下一题 →</button>
 
 <script>
+    const data = [
+        { q: "这是什么？", a1: "这是足球", a2: "这是球" },
+        { q: "这是谁的足球？", a1: "这是JJ的足球", a2: "我的足球" },
+        { q: "这是什么？", a1: "这是花", a2: "漂亮的花" }
+    ];
 
-const data = [
+    let index = 0;
+    const synth = window.speechSynthesis;
 
-{
-q:"这是什么？",
-a1:"这是足球",
-a2:"这是球"
-},
+    // 获取DOM元素
+    const qBtn = document.getElementById("question");
+    const a1Btn = document.getElementById("answer1");
+    const a2Btn = document.getElementById("answer2");
+    const resultDiv = document.getElementById("result");
 
-{
-q:"这是谁的足球？",
-a1:"这是JJ的足球",
-a2:"我的足球"
-},
+    // 1. 解锁声音的关键函数
+    function startApp() {
+        // 创建一个空白语音并播放，以此解锁权限
+        const msg = new SpeechSynthesisUtterance("");
+        synth.speak(msg);
+        
+        document.getElementById("start-overlay").style.display = "none";
+        loadQuestion();
+    }
 
-{
-q:"这是什么？",
-a1:"这是花",
-a2:"漂亮的花"
-}
+    // 2. 增强的朗读函数
+    function speak(text) {
+        // 先取消当前正在读的内容
+        synth.cancel();
 
-];
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = "zh-CN";
+        msg.rate = 0.9; // 语速稍慢，适合练习
+        
+        // 尝试选择中文语音
+        const voices = synth.getVoices();
+        const chineseVoice = voices.find(v => v.lang.includes('zh'));
+        if (chineseVoice) msg.voice = chineseVoice;
 
-let index = 0;
+        synth.speak(msg);
+    }
 
-const question =
-document.getElementById("question");
+    function loadQuestion() {
+        const item = data[index];
+        qBtn.innerText = item.q;
+        a1Btn.innerText = item.a1;
+        a2Btn.innerText = item.a2;
+        resultDiv.innerText = "";
+        
+        // 自动朗读新问题
+        setTimeout(() => speak(item.q), 300);
+    }
 
-const answer1 =
-document.getElementById("answer1");
+    // 事件绑定
+    qBtn.onclick = () => {
+        speak(data[index].q);
+        resultDiv.innerText = "问题： " + data[index].q;
+    };
 
-const answer2 =
-document.getElementById("answer2");
+    a1Btn.onclick = () => {
+        speak(data[index].a1);
+        resultDiv.innerText = "你说：" + data[index].a1;
+    };
 
-const result =
-document.getElementById("result");
+    a2Btn.onclick = () => {
+        speak(data[index].a2);
+        resultDiv.innerText = "你说：" + data[index].a2;
+    };
 
-const next =
-document.getElementById("next");
+    document.getElementById("next").onclick = () => {
+        index = (index + 1) % data.length;
+        loadQuestion();
+    };
 
-function speak(text){
-
-speechSynthesis.cancel();
-
-const msg =
-new SpeechSynthesisUtterance(text);
-
-msg.lang = "zh-CN";
-
-speechSynthesis.speak(msg);
-
-}
-
-function loadQuestion(){
-
-question.innerText =
-data[index].q;
-
-answer1.innerText =
-data[index].a1;
-
-answer2.innerText =
-data[index].a2;
-
-result.innerText = "";
-
-}
-
-question.onclick = function(){
-
-speak(data[index].q);
-
-result.innerText =
-"听问题";
-
-};
-
-answer1.onclick = function(){
-
-speak(data[index].a1);
-
-result.innerText =
-"你说：" + data[index].a1;
-
-};
-
-answer2.onclick = function(){
-
-speak(data[index].a2);
-
-result.innerText =
-"你说：" + data[index].a2;
-
-};
-
-next.onclick = function(){
-
-index++;
-
-if(index >= data.length){
-
-index = 0;
-
-}
-
-loadQuestion();
-
-};
-
-loadQuestion();
-
+    // 预热语音列表（部分浏览器需要）
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = () => synth.getVoices();
+    }
 </script>
 
 </body>
