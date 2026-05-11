@@ -1,67 +1,49 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>中文对话练习</title>
+<title>中文练习</title>
 
 <style>
-    body {
-        text-align: center;
-        font-family: sans-serif;
-        padding: 20px;
-        background: #f0f4f8;
-    }
 
-    .bar {
-        width: 100%;
-        max-width: 400px;
-        padding: 20px;
-        margin: 12px auto;
-        border-radius: 15px;
-        border: none;
-        cursor: pointer;
-        display: block;
-        font-size: 22px;
-        font-weight: bold;
-        color: white;
-        transition: 0.2s;
-    }
+body{
+    font-family:sans-serif;
+    text-align:center;
+    background:#f0f4f8;
+    padding:20px;
+}
 
-    .bar:active {
-        transform: scale(0.98);
-    }
+button{
+    width:300px;
+    padding:20px;
+    margin:10px;
+    border:none;
+    border-radius:15px;
+    font-size:22px;
+    color:white;
+}
 
-    .blue {
-        background: #2196F3;
-        box-shadow: 0 4px #1565C0;
-    }
+.blue{
+    background:#2196F3;
+}
 
-    .green {
-        background: #4CAF50;
-        box-shadow: 0 4px #2e7d32;
-    }
+.green{
+    background:#4CAF50;
+}
 
-    .orange {
-        background: #ff9800;
-        box-shadow: 0 4px #e68a00;
-        margin-top: 30px;
-    }
+.orange{
+    background:orange;
+}
 
-    #result {
-        margin: 20px;
-        color: #ff5722;
-        font-weight: bold;
-        font-size: 24px;
-        min-height: 40px;
-    }
+#result{
+    margin:20px;
+    font-size:24px;
+    color:#ff5722;
+}
 
-    .hint {
-        font-size: 14px;
-        color: #666;
-        margin-top: 10px;
-    }
 </style>
 </head>
 
@@ -69,133 +51,138 @@
 
 <h1>中文对话练习</h1>
 
-<div class="hint">点击蓝条听问题</div>
-
-<button id="q-bar" class="bar blue" onclick="speakQuestion()">
-    加载中...
+<button id="question" class="blue">
+加载中
 </button>
 
-<div class="hint">点击绿条选择回答</div>
+<br>
 
-<button id="a1" class="bar green" onclick="choose(this.innerText)">
-    ---
+<button id="answer1" class="green">
+---
 </button>
 
-<button id="a2" class="bar green" onclick="choose(this.innerText)">
-    ---
+<button id="answer2" class="green">
+---
 </button>
 
-<p id="result"></p>
+<div id="result"></div>
 
-<button class="bar orange" onclick="nextQuestion()">
-    下一句 ➡️
+<button id="next" class="orange">
+下一题
 </button>
 
 <script>
-    // 对话数据
-    const data = [
-        { q: "这是什么？", a: ["这是足球", "这是球"] },
-        { q: "这是谁的足球？", a: ["这是JJ的足球", "我的足球"] },
 
-        { q: "这是什么？", a: ["这是花", "漂亮的花"] },
-        { q: "这是谁的花？", a: ["这是Sophia的花", "妈妈的花"] },
+const data = [
 
-        { q: "这是什么？", a: ["这是鞋子", "小鞋子"] },
-        { q: "这是谁的鞋子？", a: ["这是妈妈的鞋子", "JJ的鞋子"] },
+{
+q:"这是什么？",
+a1:"这是足球",
+a2:"这是球"
+},
 
-        { q: "这是什么？", a: ["这是钱", "纸币"] },
-        { q: "这是谁的钱？", a: ["这是爸爸和妈妈的钱", "我的钱"] },
+{
+q:"这是谁的足球？",
+a1:"这是JJ的足球",
+a2:"我的足球"
+},
 
-        { q: "这是什么？", a: ["这是小狗", "可爱的小狗"] },
-        { q: "这是谁的小狗？", a: ["这是Maddie的小狗", "我们的狗狗"] }
-    ];
+{
+q:"这是什么？",
+a1:"这是花",
+a2:"漂亮的花"
+}
 
-    let index = 0;
+];
 
-    // 播放语音
-    function speak(text) {
+let index = 0;
 
-        if (!text || text === "---") return;
+const question =
+document.getElementById("question");
 
-        // 停止之前的语音
-        speechSynthesis.cancel();
+const answer1 =
+document.getElementById("answer1");
 
-        const msg = new SpeechSynthesisUtterance(text);
+const answer2 =
+document.getElementById("answer2");
 
-        msg.lang = "zh-CN";
-        msg.rate = 0.8;
-        msg.pitch = 1;
+const result =
+document.getElementById("result");
 
-        speechSynthesis.speak(msg);
-    }
+const next =
+document.getElementById("next");
 
-    // 点击问题
-    function speakQuestion() {
+function speak(text){
 
-        const q = data[index].q;
+speechSynthesis.cancel();
 
-        document.getElementById("result").innerText =
-            "👉 听问题";
+const msg =
+new SpeechSynthesisUtterance(text);
 
-        speak(q);
-    }
+msg.lang = "zh-CN";
 
-    // 选择答案
-    function choose(text) {
+speechSynthesis.speak(msg);
 
-        document.getElementById("result").innerText =
-            "你说：" + text;
+}
 
-        speak(text);
-    }
+function loadQuestion(){
 
-    // 更新页面
-    function update() {
+question.innerText =
+data[index].q;
 
-        document.getElementById("q-bar").innerText =
-            data[index].q;
+answer1.innerText =
+data[index].a1;
 
-        document.getElementById("a1").innerText =
-            data[index].a[0];
+answer2.innerText =
+data[index].a2;
 
-        document.getElementById("a2").innerText =
-            data[index].a[1];
+result.innerText = "";
 
-        document.getElementById("result").innerText = "";
-    }
+}
 
-    // 下一题
-    function nextQuestion() {
+question.onclick = function(){
 
-        index++;
+speak(data[index].q);
 
-        if (index >= data.length) {
-            index = 0;
-        }
+result.innerText =
+"听问题";
 
-        update();
+};
 
-        // 自动读题
-        setTimeout(() => {
-            speak(data[index].q);
-        }, 300);
-    }
+answer1.onclick = function(){
 
-    // 页面加载
-    window.onload = function () {
+speak(data[index].a1);
 
-        update();
+result.innerText =
+"你说：" + data[index].a1;
 
-        // 部分浏览器需要先点击一次
-        document.body.addEventListener(
-            "click",
-            function initVoice() {
-                speak("欢迎来到中文练习");
-                document.body.removeEventListener("click", initVoice);
-            },
-            { once: true }
-        );
-    };
+};
+
+answer2.onclick = function(){
+
+speak(data[index].a2);
+
+result.innerText =
+"你说：" + data[index].a2;
+
+};
+
+next.onclick = function(){
+
+index++;
+
+if(index >= data.length){
+
+index = 0;
+
+}
+
+loadQuestion();
+
+};
+
+loadQuestion();
+
 </script>
 
 </body>
